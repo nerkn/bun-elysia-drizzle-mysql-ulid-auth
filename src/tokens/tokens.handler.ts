@@ -1,5 +1,5 @@
 import { envConfig } from "../config";
-import db from "../db/drizzle";
+import db, { InsertResult } from "../db/drizzle";
 import { MyError } from "../error";
 import { logger } from "../log";
 import jwt from "jsonwebtoken";
@@ -80,7 +80,7 @@ export class TokensHandlers {
 
   private async generateRefreshToken(
     userId: string,
-    userAgent: string,
+    userAgent: string
   ): Promise<string> {
     this.log?.info("generateRefreshToken");
     const uniqueId = String(Bun.hash(userAgent));
@@ -114,9 +114,12 @@ export class TokensHandlers {
       }
 
       // create new refresh token
-      const { token: refreshToken } = (
-        await db.insert(TokensTable).values({ userId, uniqueId }).returning()
-      )[0];
+      const refreshToken = await db
+        .insert(TokensTable)
+        .values({ userId, uniqueId })
+        .then((result) =>
+          (result as unknown as InsertResult).insertId.toString()
+        );
 
       return refreshToken;
     } catch (error) {
@@ -167,8 +170,8 @@ export class TokensHandlers {
         .where(
           and(
             eq(TokensTable.uniqueId, uniqueId),
-            eq(TokensTable.userId, user.id),
-          ),
+            eq(TokensTable.userId, user.id)
+          )
         );
 
       // generate new

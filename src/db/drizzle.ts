@@ -11,5 +11,8 @@ const queryClient = createPool(process.env.DB_URL || "");
 const db = drizzle(queryClient, {
   // logger: process.env.NODE_ENV === "development",
 });
+export type InsertResult = {
+  insertId: String | number | PromiseLike<number | String>;
+};
 
 export default db;

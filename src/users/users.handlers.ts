@@ -13,6 +13,9 @@ import { MyError } from "../error";
 import { password } from "bun";
 
 export class UsersHandlers {
+  resetPassword(resetId: string, password: string) {
+    throw new Error("Method not implemented.");
+  }
   private log;
   private myError;
   private redis;
@@ -37,6 +40,8 @@ export class UsersHandlers {
   public async activateUser(activationId: string) {
     // TODO :
     this.log?.info("user tried to be activated");
+    if (activationId) {
+    }
   }
   public async getUserById(userId: string): Promise<User | null> {
     this.log?.info("getUserById");

@@ -4,7 +4,7 @@ import { logger } from "../log";
 import { TokensHandlers } from "../tokens";
 import { User, UserZod, UsersHandlers } from "../users";
 import { envConfig } from "../config";
-import * as uuid from "uuid";
+import { ulid } from "ulidx";
 
 export class AuthHandlers {
   private log;
@@ -24,12 +24,12 @@ export class AuthHandlers {
   public async activate(
     activationId: string,
     headers: Record<string, string | null>,
-    cookie: Cookie<any>,
+    cookie: Cookie<any>
   ) {
     this.log?.info("activate");
 
     // TODO
-    // const user = await this.usersHandlers.activateUser(activationId)
+    const user = await this.usersHandlers.activateUser(activationId);
 
     // Tokens
     const userAgent = headers["user-agent"] || "";
@@ -74,7 +74,7 @@ export class AuthHandlers {
       email,
       password: hashPassword,
     });
-    const activationId = uuid.v4();
+    const activationId = ulid();
     // TODO
     // await this.usersHandlers.saveActivationId({name, email, password:hashPassword})
 
@@ -87,7 +87,7 @@ export class AuthHandlers {
   public async login(
     user: User,
     headers: Record<string, string | null>,
-    cookie: Cookie<any>,
+    cookie: Cookie<any>
   ) {
     this.log?.info("login");
     // Tokens
@@ -127,7 +127,7 @@ export class AuthHandlers {
   public async refresh(
     user: User,
     headers: Record<string, string | null>,
-    cookie: Cookie<any>,
+    cookie: Cookie<any>
   ) {
     this.log?.info("refresh");
     // Tokens
@@ -167,10 +167,10 @@ export class AuthHandlers {
       throw this.myError.new(
         "forgotPassword",
         403,
-        "Account in not activated. Please, check your email",
+        "Account in not activated. Please, check your email"
       );
     }
-    const resetId = uuid.v4();
+    const resetId = ulid();
 
     // TODO
     // await this.usersHandler.saveResetPasswordId(resetId);
@@ -184,8 +184,7 @@ export class AuthHandlers {
     this.log?.info("resetPassword");
     const password = await Bun.password.hash(newPassword);
 
-    // TODO
-    // const user = await this.userService.resetPassword(resetId, password);
+    const user = await this.usersHandlers.resetPassword(resetId, password);
     if (!user) {
       throw this.myError.new("resetPassword", 404, "User not found");
     }

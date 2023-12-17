@@ -16,7 +16,11 @@ import {
 import { TokensTable } from "../tokens";
 import { createSelectSchema } from "drizzle-zod";
 import { ulid } from "ulidx";
-export const roleEnum = mysqlEnum("role", ["admin", "user", "moder"]);
+// export type RoleType = "admin" | "user" | "moder";
+// const roles: [RoleType, ...RoleType[]] = ["admin", "user", "moder"];
+const roles = ["admin", "user", "moder"] as const;
+export type RoleType = (typeof roles)[number];
+export const roleEnum = mysqlEnum("role", roles);
 
 export const UsersTable = mysqlTable(
   "users",
@@ -57,7 +61,6 @@ export type UserCreate = Pick<
   InferInsertModel<typeof UsersTable>,
   "name" | "email" | "password"
 >;
-//export type RoleType = (typeof roleEnum.$type)[number];
 
 export const UserZod = createSelectSchema(UsersTable, {
   email: (schema) => schema.email.email(),
