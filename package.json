@@ -1,12 +1,12 @@
 {
-  "name": "auth2",
+  "name": "elysiaGameServer",
   "version": "1.0.50",
   "scripts": {
     "dev": "NODE_ENV=development bun run --watch src/index.ts",
     "prod": "NODE_ENV=production bun run src/index.ts",
     "lint": "bun run prettier . --write --ignore-unknown",
-    "generate": "bun run drizzle-kit generate:pg",
-    "push": "bun run drizzle-kit push:pg"
+    "generate": "bun run drizzle-kit generate:mysql",
+    "push": "bun run drizzle-kit push:mysql"
   },
   "dependencies": {
     "@elysiajs/bearer": "^0.7.0",
@@ -16,10 +16,10 @@
     "elysia": "latest",
     "http-errors": "^2.0.0",
     "jsonwebtoken": "8.5.1",
+    "mysql2": "^3.6.5",
     "nodemailer": "^6.9.6",
-    "postgres": "^3.3.5",
     "redis": "^4.6.10",
-    "uuid": "^9.0.1",
+    "ulidx": "^2.2",
     "winston": "^3.10.0"
   },
   "devDependencies": {
@@ -27,11 +27,14 @@
     "@types/http-errors": "^2.0.2",
     "@types/jsonwebtoken": "^9.0.3",
     "@types/nodemailer": "^6.4.11",
-    "@types/uuid": "^9.0.5",
     "@types/winston": "^2.4.4",
     "bun-types": "^1.0.5-canary.20231009T140142",
-    "drizzle-kit": "^0.19.13",
+    "drizzle-kit": "^0.20.6",
     "prettier": "^3.0.3"
   },
-  "module": "src/index.js"
+  "module": "src/index.js",
+  "type": "module",
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
 }

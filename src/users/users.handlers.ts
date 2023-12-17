@@ -34,7 +34,10 @@ export class UsersHandlers {
       throw this.myError.new("getAllUsers", 500, error);
     }
   }
-
+  public async activateUser(activationId: string) {
+    // TODO :
+    this.log?.info("user tried to be activated");
+  }
   public async getUserById(userId: string): Promise<User | null> {
     this.log?.info("getUserById");
 
@@ -49,7 +52,7 @@ export class UsersHandlers {
     try {
       const cacheUser: User = await this.redis.check(
         `getUserById:${userId}`,
-        10,
+        10
       );
       if (cacheUser) {
         return { ...cacheUser, createdAt: new Date(cacheUser.createdAt) };
@@ -81,7 +84,7 @@ export class UsersHandlers {
     try {
       const cacheUser: User = await this.redis.check(
         `getUserByEmail:${userEmail}`,
-        10,
+        10
       );
       if (cacheUser) {
         return { ...cacheUser, createdAt: new Date(cacheUser.createdAt) };
@@ -116,12 +119,15 @@ export class UsersHandlers {
 
     // Query
     try {
-      const result = await db
-        .insert(UsersTable)
-        .values([{ ...dto }])
-        .returning();
+      await db.insert(UsersTable).values([{ ...dto }]);
 
-      return result[0];
+      let result = await db
+        .select()
+        .from(UsersTable)
+        .where(eq(UsersTable.email, dto.email));
+      if (result.length) return result[0];
+
+      throw this.myError.new("createUser", 500, "user fetch failed");
     } catch (error) {
       throw this.myError.new("createUser", 500, error);
     }
@@ -144,12 +150,11 @@ export class UsersHandlers {
 
     // Query
     try {
-      const result = await db
-        .update(UsersTable)
-        .set(dto)
-        .where(eq(UsersTable.id, dto.id))
-        .returning();
-
+      await db.update(UsersTable).set(dto).where(eq(UsersTable.id, dto.id));
+      let result = await db
+        .select()
+        .from(UsersTable)
+        .where(eq(UsersTable.id, dto.id));
       return result[0];
     } catch (error) {
       throw this.myError.new("addRoleToUser", 500, error);
@@ -172,9 +177,7 @@ export class UsersHandlers {
     try {
       const result = await db
         .delete(UsersTable)
-        .where(eq(UsersTable.id, userId))
-        .returning();
-      if (result[0]) return result[0];
+        .where(eq(UsersTable.id, userId));
       return null;
     } catch (error) {
       throw this.myError.new("deleteUser", 500, error);

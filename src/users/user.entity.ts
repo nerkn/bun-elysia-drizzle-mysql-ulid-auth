@@ -5,30 +5,32 @@ import {
   sql,
 } from "drizzle-orm";
 import {
-  pgEnum,
-  pgTable,
+  mysqlEnum,
+  mysqlTable,
   boolean,
   timestamp,
-  uuid,
   varchar,
   index,
   uniqueIndex,
-} from "drizzle-orm/pg-core";
+} from "drizzle-orm/mysql-core";
 import { TokensTable } from "../tokens";
 import { createSelectSchema } from "drizzle-zod";
-export const roleEnum = pgEnum("role", ["admin", "user", "moder"]);
+import { ulid } from "ulidx";
+export const roleEnum = mysqlEnum("role", ["admin", "user", "moder"]);
 
-export const UsersTable = pgTable(
+export const UsersTable = mysqlTable(
   "users",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
-    role: roleEnum("role").default("user").notNull(),
+    id: varchar("id", { length: 36 })
+      .primaryKey()
+      .$defaultFn(() => ulid()),
+    role: roleEnum.default("user").notNull(),
     name: varchar("name", { length: 100 }).notNull(),
     email: varchar("email", { length: 255 }).notNull().unique(),
     password: varchar("password", { length: 118 }).notNull(),
     image: varchar("image", { length: 255 }),
-    activationId: uuid("activationLink"),
-    resetPasswordId: uuid("resetPasswordId"),
+    activationId: varchar("activationLink", { length: 36 }),
+    resetPasswordId: varchar("resetPasswordId", { length: 36 }),
     isActivated: boolean("isActivated").default(false).notNull(),
     isBanned: boolean("isBanned").default(false).notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -39,7 +41,7 @@ export const UsersTable = pgTable(
       createdAtIdx: index("createdAt_idx").on(table.createdAt),
       activationIdIdx: uniqueIndex("activationId_idx").on(table.activationId),
     };
-  },
+  }
 );
 
 export const UsersRelations = relations(UsersTable, ({ many }) => ({
@@ -55,7 +57,7 @@ export type UserCreate = Pick<
   InferInsertModel<typeof UsersTable>,
   "name" | "email" | "password"
 >;
-export type RoleType = (typeof roleEnum.enumValues)[number];
+//export type RoleType = (typeof roleEnum.$type)[number];
 
 export const UserZod = createSelectSchema(UsersTable, {
   email: (schema) => schema.email.email(),
